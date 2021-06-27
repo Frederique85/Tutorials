@@ -75,3 +75,4 @@ names(DL_proceedings)
 DL <- bind_rows(DL_articles, DL_proceedings) # Merge the two datasets
 
 saveRDS(DL, "DeepLearning_dataset.RDS") # Save the final file
+
