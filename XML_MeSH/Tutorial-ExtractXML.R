@@ -1,6 +1,6 @@
-## CrossRef Deep learning tutorial (2)
+##  Extract XML data - MeSH data 
 ##  by F. Bone / www.brightdatasci.com
-##  on 20/06/2021
+##  on 25/07/2021
 #############################################
 #############################################
 
@@ -10,12 +10,14 @@
 #(2) Explore and do a first extraction of the data of interest
 #(3) Extract MeSH data through a for loop
 #(4) Extract MeSH data using purrr
-#(5) Final tidying of the data and saving
+#(5) Saving the data
+#(6) Extract data with xmlconvert
 
 # 1. Load the relevant libraries and dataset
 #--------------------------------------------
 library(tidyverse)          # load the library needed
 library(xml2)
+library(xmlconvert)
 
 # load the data from the web using xml2
 mesh_xml <- read_xml("https://nlmpubs.nlm.nih.gov/projects/mesh/MESH_FILES/xmlmesh/desc2021.xml")
@@ -116,8 +118,30 @@ mesh_data_sample <- mesh_data_sample  %>%
   rowwise()%>%
   mutate(mesh_list = paste(mesh_list, collapse = ';'))
 
-
-# 5. Final tidying of the data and saving
+# 5. Saving the data
 #-------------------------------------------
 # Save the dataset
 write_csv(mesh_data_sample, "mesh_data_sample.csv")
+
+
+# 6. Extract MeSH data with xmlconvert
+#---------------------------------------
+
+#Extract the sample directly into a dataframe
+mesh_data_sample <- xml_to_df("https://nlmpubs.nlm.nih.gov/projects/mesh/MESH_FILES/xmlmesh/desc2021.xml", 
+                              records.tag = "DescriptorRecord",
+                              first.records = 50,
+                              only.fields = c("DescriptorUI", "TreeNumberList", "DescriptorName"))
+
+# Tidy the dataset by changing the delimiter
+mesh_data_sample  <- mesh_data_sample %>%
+    mutate(DescriptorName = gsub("\\|String~", "", DescriptorName)) %>%
+    mutate(DescriptorName = gsub("\\|", "", DescriptorName)) %>%
+    mutate(TreeNumberList = gsub("\\|TreeNumber~","", TreeNumberList)) %>%
+    mutate(TreeNumberList = gsub("\\|",";", TreeNumberList)) %>%
+    mutate(TreeNumberList = gsub(";$","", TreeNumberList)) %>%
+    rename(mesh_name = DescriptorName,
+           mesh_descriptors = DescriptorUI,
+           mesh_list = TreeNumberList)
+
+
