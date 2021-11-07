@@ -28,7 +28,7 @@ query_keywords <- "covid"
 start_date_prefix <- "&from-date="
 date <- "2019-01-01"
 api_key_prefix <- "&api-key="
-api_key <- YourApiKey
+api_key <- YourApiKey # Don't forget to change this to your own API key
 
 # Put the query together
 query_full <- paste0(base_url, query_prefix, query_keywords, start_date_prefix, date, api_key_prefix, api_key)
